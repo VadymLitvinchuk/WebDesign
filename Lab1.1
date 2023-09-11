@@ -1,1 +1,41 @@
+using System;
 
+class Program
+{
+    static void Main()
+    {
+        
+        Random random1 = new Random(1234);
+
+       
+        Random random2 = new Random();
+
+       
+        int sequenceLength = 10;
+
+        Console.WriteLine("Послідовність для генератора 1 :");
+        for (int i = 0; i < sequenceLength; i++)
+        {
+            int randomNumber = random1.Next(1, 10); 
+            Console.WriteLine(randomNumber);
+        }
+
+        Console.WriteLine("\nПослідовність для генератора 2 :");
+        for (int i = 0; i < sequenceLength; i++)
+        {
+            int randomNumber = random2.Next(1, 10); 
+            Console.WriteLine(randomNumber);
+        }
+
+        
+        Console.WriteLine("\nПорівняння елементів :");
+        for (int i = 0; i < sequenceLength; i++)
+        {
+            int number1 = random1.Next(1, 10);
+            int number2 = random2.Next(1, 10);
+
+            Console.WriteLine($"Елемент {i + 1}: {number1} (генератор 1) vs. {number2} (генератор 2)");
+            Console.WriteLine($"Рівність {number1 == number2}");
+        }
+    }
+}
