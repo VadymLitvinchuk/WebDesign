@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Vadym Litvinchuk</title>
+</head>
+<body>
+    <h1>Vadym Litvinchuk</h1>
+    <p style="color: #FF5733; background-color: #41A8DF; text-align: center; font-family: Arial;">I am a student at Taras Shevchenko University of Kyiv</p>
+    <p style="font-family: Bahnschrift;"><mark style="background-color: #FFD700; color: #333; font-weight: bold;">I like to play football, listen to music, and travel.</mark></p>
+    <p><em>Coding</em> is an area in which I want to <i><ins>work.</ins></i></p>
+    <hr>
+    <h3>Example of my work:</h3>
+    <blockquote style="border: 4px solid #00FF00; width: 400px; height: 400px;">
+        <img src="C:\\Users\\vadim\\OneDrive\\Изображения\\Снимки экрана\\Знімок екрана 2023-09-11 161320.png" height="300" width="400" alt="My code">
+        <p><cite>Example of code</cite> by Vadym Litvinchuk. Screenshot taken in 2023</p>
+    </blockquote>
+    <hr>
+    <pre style="color: #333; font-family: 'Segoe UI Emoji', Tahoma, Verdana, Geneva, Tahoma, sans-serif;">
+        <!-- Your text here -->
+    </pre>
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhLrq4s4xwmnVwnLBDcBPH7CZY4SSto1DoDA&usqp=CAU" alt="Image" height="100" width="100" />
+    <a href="https://github.com/VadymLitvinchuk">Links to my repositories.</a>
+    <br>
+    <br>
+</body>
+</html>
