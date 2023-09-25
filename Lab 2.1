@@ -1,0 +1,43 @@
+using System;
+using System.IO;
+using System.Text;
+class Program
+{
+ static void Main()
+ {
+
+ Console.WriteLine("Enter the path to the input file:");
+ string inputFilePath = Console.ReadLine();
+ 
+ Console.WriteLine("Enter the path to the output file (encrypted):");
+ string outputFilePath = Console.ReadLine();
+ 
+ Console.WriteLine("Enter the encryption key:");
+ string key = Console.ReadLine();
+ try
+ {
+ 
+ byte[] inputBytes = File.ReadAllBytes(inputFilePath);
+ 
+ byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+ 
+ byte[] encryptedBytes = Encrypt(inputBytes, keyBytes);
+
+ File.WriteAllBytes(outputFilePath, encryptedBytes);
+ Console.WriteLine("File encrypted and saved as " + outputFilePath);
+ }
+ catch (Exception ex)
+ {
+ Console.WriteLine("An error occurred: " + ex.Message);
+ }
+ }
+ static byte[] Encrypt(byte[] inputBytes, byte[] key)
+ {
+ byte[] encryptedBytes = new byte[inputBytes.Length];
+ for (int i = 0; i < inputBytes.Length; i++)
+ {
+ encryptedBytes[i] = (byte)(inputBytes[i] ^ key[i % key.Length]);
+ }
+ return encryptedBytes;
+ }
+}
