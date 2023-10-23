@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Резюме - Vadym Litvinchuk</title>
+    <style>
+        /* Стилі для елементів заголовка */
+        header {
+            background-color: #41A8DF;
+            color: #FF5733;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 24px;
+        }
+
+        /* Загальні стилі для контейнера */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Стилі для заголовків розділів */
+        h2 {
+            font-size: 20px;
+            color: #007acc; /* Зміна кольору тексту */
+            margin: 15px 0; /* Зовнішні відступи зверху та знизу */
+        }
+
+        /* Стилі для тексту параграфів */
+        p {
+            font-size: 16px;
+            line-height: 1.5; /* Міжрядковий інтервал */
+        }
+
+        /* Стилі для посилань */
+        a {
+            color: #007acc;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline; /* Підкреслення по наведенню курсора */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Резюме - Vadym Litvinchuk</h1>
+    </header>
+    <div class="container">
+        <section>
+            <h2>Про мене</h2>
+            <p>Я студент Тараса Шевченка Київського університету. Мені подобається грати в футбол, слухати музику та подорожувати.</p>
+            <p><strong>Програмування</strong> - це сфера, в якій я хочу працювати.</p>
+        </section>
+        <section>
+            <h2>Приклад моєї роботи</h2>
+            <img src="C:\\Users\\vadim\\OneDrive\\Изображения\\Снимки экрана\\Знімок екрана 2023-09-11 161320.png" alt="Мій код">
+            <p><em>Приклад коду</em> Vadym Litvinchuk. Скріншот від 2023 року.</p>
+        </section>
+        <section>
+            <h2>Розклад на тиждень</h2>
+            <table border="1">
+                <caption><strong>Ось мій розклад на тиждень:</strong></caption>
+                <tr>
+                    <th>Пари:</th>
+                    <td>перша пара</td>
+                    <td>друга пара</td>
+                    <td>третя пара</td>
+                </tr>
+                <tr>
+                    <th>Час: </th>
+                    <td>9:00-10:20</td>
+                    <td>10:30-11:50</td>
+                    <td>12:10-13:30</td>
+                </tr>
+                <tr>
+                    <th>Час відпочинку</th>
+                    <td>10 хв</td>
+                    <td>10 хв</td>
+                    <td>20 хв</td>
+                </tr>
+            </table>
+        </section>
+        <section>
+            <h2>Мови програмування, які я вивчав і вивчаю:</h2>
+            <ul>
+                <li>Python</li>
+                <li>C++</li>
+                <li>C#</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Важливе для продуктивної роботи</h2>
+            <ul>
+                <li>Організоване робоче середовище</li>
+                <li>Шумозаглушуючі навушники</li>
+                <li>Корисні снеки та напої</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Оптимізація робочого місця</h2>
+            <ul>
+                <li>Два монітори для роботи з багатьма завданнями</li>
+                <li>Ергономічний стіл та стілець</li>
+                <li>Освітлення завдяки якому менше втомлюються очі</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Пристрої та обладнання для ефективної роботи</h2>
+            <ul>
+                <li>Бездротова клавіатура та мишка</li>
+                <li>Високоякісний мікрофон і веб-камера</li>
+                <li>Портативний сканер документів</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Посилання</h2>
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhLrq4s4xwmnVwnLBDcBPH7CZY4SSto1DoDA&usqp=CAU" alt="Зображення" height="100" width="100">
+            <a href="https://github.com/VadymLitvinchuk">Посилання на мої репозиторії.</a>
+        </section>
+    </div>
+</body>
+</html>
