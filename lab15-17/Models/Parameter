@@ -1,0 +1,22 @@
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+namespace Electronic.Models
+{
+    public class Parameter
+    {
+        public int ParameterId { get; set; }
+
+        [Required(ErrorMessage = "Це поле є обов'язковим")]
+        public string Name { get; set; } // Назва виробника
+
+        [Required(ErrorMessage = "Це поле є обов'язковим")]
+        public string Category { get; set; } // Категорія пристрою
+
+        [Required(ErrorMessage = "Це поле є обов'язковим")]
+        public string Description { get; set; } // Опис компанії 
+
+        // Навігаційна властивість для електроніки
+        public ICollection<Device> Device { get; set; }
+    }
+}
