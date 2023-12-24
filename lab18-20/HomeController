@@ -1,0 +1,205 @@
+using Electronic.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using System.Reflection.Metadata;
+using WebApp.Models;
+using WebApplication1.Data;
+
+namespace Electronick.Controllers
+{
+    public class HomeController : Controller
+    {
+        private readonly ApplicationDbContext _dbContext;
+
+        public HomeController(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
+        
+        public IActionResult Index()
+        {
+            var devices = _dbContext.Devices
+                .Include(b => b.Parameter)
+                .ToList();
+
+            var parameters = _dbContext.Parameters
+                .Include(a => a.Devices)  
+                .ToList();
+
+            ViewBag.Parameters = parameters;
+            return View(devices);
+        }
+
+
+        
+        public IActionResult CreateDevice()
+        {
+            ViewBag.Parameters = new SelectList(_dbContext.Parameters.ToList(), "Id", "Name");
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult CreateDevice(Device device)
+        {
+            if (ModelState.IsValid)
+            {
+                _dbContext.Devices.Add(device);
+                _dbContext.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewBag.Parameters = new SelectList(_dbContext.Parameters.ToList(), "Id", "Name");
+            return View(device);
+        }
+
+        
+        public IActionResult EditDevice(int id)
+        {
+            ViewBag.Parameters = new SelectList(_dbContext.Parameters.ToList(), "Id", "Name");
+            var device = _dbContext.Devices.Find(id);
+            return View(device);
+        }
+
+        [HttpPost]
+        public IActionResult EditDevice(Device device)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    _dbContext.Entry(device).State = EntityState.Modified;
+                    _dbContext.SaveChanges();
+                    return RedirectToAction(nameof(Index));
+                }
+
+                ViewBag.Parameters = new SelectList(_dbContext.Parameters.ToList(), "Id", "Name");
+                return View(device);
+            }
+            catch (Exception ex)
+            {
+                
+                ViewBag.Parameters = new SelectList(_dbContext.Parameters.ToList(), "Id", "Name");
+                return View(device);
+            }
+        }
+
+        
+        public ActionResult DeleteDevice(int id)
+        {
+            ViewBag.Devices = _dbContext.Devices.ToList();
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult DeleteDevice(int id, Device device)
+        {
+            try
+            {
+                _dbContext.Devices.Remove(device);
+                _dbContext.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+               
+                return View(device);
+            }
+        }
+
+        
+        public IActionResult CreateParameter()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult CreateParameter(Parameter parameter)
+        {
+            if (ModelState.IsValid)
+            {
+                _dbContext.Parameters.Add(parameter);
+                _dbContext.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(parameter);
+        }
+
+        // Update (Edit)
+        public IActionResult EditParameter(int id)
+        {
+            var parameter = _dbContext.Parameters.Find(id);
+
+            if (parameter != null)
+            {
+                return View(parameter);
+            }
+
+            return NotFound();
+        }
+
+        [HttpPost]
+        public IActionResult EditParameter(Parameter parameter)
+        {
+            if (ModelState.IsValid)
+            {
+                _dbContext.Parameters.Update(parameter);
+                _dbContext.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(parameter);
+        }
+
+        
+        public ActionResult DeleteParameter(int id)
+        {
+            ViewBag.Parameters = _dbContext.Parameters.ToList();
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult DeleteParameter(int id, Parameter parameter)
+        {
+            _dbContext.Parameters.Remove(parameter);
+            _dbContext.SaveChanges();
+            return RedirectToAction(nameof(Index));
+        }
+
+        
+        [HttpGet]
+        public ActionResult Buy(int? id)
+        {
+            ViewBag.ElectronicsId = id ?? 0;
+            return View();
+        }
+
+        [HttpPost]
+        public string Buy(Purchase purchase)
+        {
+            if (ModelState.IsValid)
+            {
+                purchase.Date = DateTime.Now;
+                _dbContext.Purchases.Add(purchase);
+                _dbContext.SaveChanges();
+                return $"Thanks, {purchase.Person}!";
+            }
+
+            return "Error in purchase.";
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+    }
+}
