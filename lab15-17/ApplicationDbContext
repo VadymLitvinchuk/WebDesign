@@ -1,0 +1,27 @@
+using Electronic.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace WebApplication1.Data
+{
+    public class ApplicationDbContext : IdentityDbContext
+    {
+        public DbSet<Device> Devices { get; set; }
+        public DbSet<Purchase> Purchases { get; set; }
+        public DbSet<Parameter> Parameters { get; set; }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Device>()
+                .HasOne(b => b.Parameter)
+                .WithMany(a => a.Device)
+                .HasForeignKey(b => b.ParameterId); 
+        }
+    }
+}
