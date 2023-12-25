@@ -1,0 +1,110 @@
+@using WebApp.ViewModels
+
+@model List<DeviceViewModel>
+@{
+    ViewData["Title"] = "Магазин Електроніки";
+}
+
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #dee2e6;
+        text-align: left;
+        padding: 12px;
+    }
+
+    th {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    tr:nth-child(odd) {
+        background-color: #ffffff;
+    }
+
+    h1 {
+        text-align: center;
+        margin-top: 40px;
+        color: #007bff;
+    }
+
+    p {
+        margin: 0;
+    }
+
+    .action-links {
+        text-decoration: none;
+        color: #007bff;
+        margin-right: 10px;
+    }
+
+    .action-links:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="container">
+    <h1>Електроніка:</h1>
+
+    <table>
+        <tr>
+            <th>Назва</th>
+            <th>Тип</th>
+            <th>Характеристики</th>
+            <th>Гарантія</th>
+            <th>Дата виходу</th>
+            <th>Виробник</th>
+            <th>Ціна</th>
+            
+        </tr>
+        @foreach (var device in Model)
+        {
+            <tr>
+                <td><p>@device.Name</p></td>
+                <td><p>@device.NameCategory</p></td>
+                <td><p>@device.spacifications</p></td>
+                <td><p>@device.waranty</p></td>
+                <td><p>@device.Date</p></td>
+                <td><p>@device.NameCompany</p></td>
+                <td><p>@device.Price</p></td>
+                <td>
+                    <p>
+                        @if (device.CategoryId == 1)
+                        {
+                            <a class="action-links" href="/Home/Buy/@device.Id">Купити</a>
+                        }
+                        @else if (device.CategoryId == 2)
+                        {
+                            <a class="action-links" href="/Home/EditDevice/@device.Id">Редагувати девайс</a>
+                        }
+                        @else
+                        {
+                            <a class="action-links" href="/Home/EditCategory/@device.CategoryId">Редагувати категорію</a>
+                        }
+                    </p>
+                </td>
+            </tr>
+        }
+    </table>
+</div>
