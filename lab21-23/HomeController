@@ -1,0 +1,271 @@
+using System.Diagnostics;
+using System.Reflection.Metadata;
+using Electronic.Controllers;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebApp.Models;
+using WebApplication1.Data;
+
+namespace WebApp.Controllers
+{
+    public class HomeController : Controller
+    {
+        private readonly ApplicationDbContext _dbContext;
+
+        public HomeController(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
+        public IActionResult Index()
+        {
+            var devices = _dbContext.Devices
+                .Include(b => b.Parameter)
+                .Include(b => b.Category)
+                .Select(b => new DeviceViewModel(b))
+                .ToList();
+
+            var parameters = _dbContext.Parameters
+                .Include(a => a.Devices)
+                .ToList();
+
+            var categories = _dbContext.Categories
+                .Include(a => a.Devices)
+                .ToList();
+
+            ViewBag.Parameters = parameters;
+            ViewBag.Categories = categories;
+
+            return View(devices);
+        }
+
+        
+        public IActionResult CreateDevice()
+        {
+            PopulateDropDowns();
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult CreateDevice(DeviceViewModel deviceViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var device = new Device(deviceViewModel);
+                _dbContext.Devices.Add(device);
+                _dbContext.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+
+            PopulateDropDowns();
+            return View(deviceViewModel);
+        }
+
+
+        public IActionResult EditDevice(int id)
+        {
+            PopulateDropDowns();
+            var device = _dbContext.Devices.Find(id);
+            if (device == null)
+            {
+                return NotFound();
+            }
+
+            var deviceViewModel = new DeviceViewModel(device);
+            return View(deviceViewModel);
+        }
+
+        [HttpPost]
+        public IActionResult EditDevice(DeviceViewModel deviceViewModel)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var device = new Device(deviceViewModel);
+                    _dbContext.Entry(device).State = EntityState.Modified;
+                    _dbContext.SaveChanges();
+                    return RedirectToAction(nameof(Index));
+                }
+
+                PopulateDropDowns();
+                return View(deviceViewModel);
+            }
+            catch (Exception ex)
+            {
+                
+                PopulateDropDowns();
+                return View(deviceViewModel);
+            }
+        }
+
+        public IActionResult DeleteDevice(int id)
+        {
+            ViewBag.Devices = _dbContext.Devices.ToList();
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult DeleteDevice(int id, DeviceViewModel deviceViewModel)
+        {
+            try
+            {
+                var device = new Device(deviceViewModel);
+                _dbContext.Devices.Remove(device);
+                _dbContext.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                
+                return View(deviceViewModel);
+            }
+        }
+        public IActionResult CreateParameter()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult CreateParameter(ParameterViewModel parameterViewModel)
+        {
+            var parameter = new Parameter(parameterViewModel);
+
+            if (ModelState.IsValid)
+            {
+                _dbContext.Parameters.Add(parameter);
+                _dbContext.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(parameter);
+        }
+
+        
+        public IActionResult EditParameter(int id)
+        {
+            var parameter = _dbContext.Parameters.Find(id);
+
+            if (parameter !== null)
+            {
+                return NotFound();
+            }
+
+            var parameterViewModel = new ParameterViewModel(parameter);
+            return View(parameterViewModel);
+        }
+
+        [HttpPost]
+        public IActionResult EditParameter(ParameterViewModel parameterViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                Parameter parameter = new(parameterViewModel);
+                _dbContext.Parameters.Update(parameter);
+                _dbContext.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(parameterViewModel);
+        }
+
+        
+        public IActionResult DeleteParameter(int id)
+        {
+            ViewBag.Parameters = _dbContext.Parameters.ToList();
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult DeleteParameter(int id, ParameterViewModel parameterViewModel)
+        {
+            var parameter = new Parameter(parameterViewModel);
+            _dbContext.Parameters.Remove(parameter);
+            _dbContext.SaveChanges();
+            return RedirectToAction(nameof(Index));
+        }
+
+        
+        public IActionResult CreateCategory()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult CreateCategory(CategoryViewModel categoryViewModel)
+        {
+            var category = new Category(categoryViewModel);
+
+            if (ModelState.IsValid)
+            {
+                _dbContext.Categories.Add(category);
+                _dbContext.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(category);
+        }
+
+       
+        public IActionResult EditCategory(int id)
+        {
+            var category = _dbContext.Categories.Find(id);
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            var categoryViewModel = new CategoryViewModel(category);
+            return View(categoryViewModel);
+        }
+
+        [HttpPost]
+        public IActionResult EditCategory(CategoryViewModel categoryViewModel)
+        {
+            var category = new Category(categoryViewModel);
+
+            if (ModelState.IsValid)
+            {
+                _dbContext.Categories.Update(category);
+                _dbContext.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(categoryViewModel);
+        }
+
+        
+        public IActionResult DeleteCategory(int id)
+        {
+            ViewBag.Categories = _dbContext.Categories.ToList();
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult DeleteCategory(int id, CategoryViewModel categoryViewModel)
+        {
+            var category = new Category(categoryViewModel);
+            _dbContext.Categories.Remove(category);
+            _dbContext.SaveChanges();
+            return RedirectToAction(nameof(Index));
+        }
+
+        private void PopulateDropDowns()
+        {
+            ViewBag.Parameters = _dbContext.Parameters.ToList();
+            ViewBag.Categories = _dbContext.Categories.ToList();
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+    }
+}
