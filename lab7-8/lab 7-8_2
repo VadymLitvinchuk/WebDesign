@@ -1,0 +1,80 @@
+using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            // Генеруємо пару ключів
+            using (RSA rsa = new RSACryptoServiceProvider())
+            {
+                // Отримуємо публічний та приватний ключі
+                string publicKey = rsa.ToXmlString(false);
+                string privateKey = rsa.ToXmlString(true);
+
+                // Зберігаємо відкритий ключ у файл
+                SaveKeyToFile("PublicKey.txt", publicKey);
+                Console.WriteLine("Public Key saved to PublicKey.txt");
+
+                // Вхідні дані для шифрування
+                Console.Write("Enter data to encrypt: ");
+                string inputData = Console.ReadLine();
+
+                // Шифруємо дані за допомогою публічного ключа
+                string encryptedData = EncryptData(inputData, publicKey);
+                Console.WriteLine($"Encrypted Data: {encryptedData}");
+
+                // Зберігаємо зашифровані дані у файл
+                SaveKeyToFile("EncryptedData.txt", encryptedData);
+                Console.WriteLine("Encrypted Data saved to EncryptedData.txt");
+
+                // Зчитуємо відкритий ключ іншого користувача з файлу
+                string otherPublicKey = ReadKeyFromFile("OtherPublicKey.txt");
+
+                // Розшифровуємо дані за допомогою чужого відкритого ключа
+                string decryptedData = DecryptData(encryptedData, otherPublicKey);
+                Console.WriteLine($"Decrypted Data using Other Public Key: {decryptedData}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred: {ex.Message}");
+        }
+    }
+
+    static string EncryptData(string data, string publicKey)
+    {
+        using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+        {
+            rsa.FromXmlString(publicKey);
+            byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+            byte[] encryptedBytes = rsa.Encrypt(dataBytes, false);
+            return Convert.ToBase64String(encryptedBytes);
+        }
+    }
+
+    static string DecryptData(string encryptedData, string privateKey)
+    {
+        using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+        {
+            rsa.FromXmlString(privateKey);
+            byte[] encryptedBytes = Convert.FromBase64String(encryptedData);
+            byte[] decryptedBytes = rsa.Decrypt(encryptedBytes, false);
+            return Encoding.UTF8.GetString(decryptedBytes);
+        }
+    }
+
+    static void SaveKeyToFile(string fileName, string key)
+    {
+        File.WriteAllText(fileName, key);
+    }
+
+    static string ReadKeyFromFile(string fileName)
+    {
+        return File.ReadAllText(fileName);
+    }
+}
