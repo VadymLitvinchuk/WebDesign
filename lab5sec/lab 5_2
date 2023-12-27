@@ -1,0 +1,65 @@
+using System;
+using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Text;
+public class PBKDF2
+{
+    private byte[] salt;
+    private HashAlgorithmName hashAlgorithm;
+    public PBKDF2(HashAlgorithmName hashAlgorithm)
+    {
+        // Генеруємо унікальну "сіль" для кожного екземпляру класу
+        GenerateSalt();
+        // Задаємо алгоритм хешування
+        this.hashAlgorithm = hashAlgorithm;
+    }
+    public string ComputeHash(string password, int iterations)
+    {
+        // Перетворюємо пароль в байтовий масив
+        byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+        // Використовуємо PBKDF2 для обчислення хеша з вказаною кількістю ітерацій
+        using (var pbkdf2 = new Rfc2898DeriveBytes(passwordBytes, salt, iterations, hashAlgorithm))
+        {
+            // Отримуємо байтовий масив хеша
+            byte[] hash = pbkdf2.GetBytes(32); // 32 - розмір хеша в байтах
+                                               // Перетворюємо хеш в рядок для зручності виведення
+            return Convert.ToBase64String(hash);
+        }
+    }
+    private void GenerateSalt()
+    {
+        // Використовуємо криптографічно безпечний генератор випадкових чисел для створення "солі"
+        using (var rng = new RNGCryptoServiceProvider())
+        {
+            byte[] saltBytes = new byte[16]; // 16 байт - розмір "солі"
+            rng.GetBytes(saltBytes);
+            salt = saltBytes;
+        }
+    }
+}
+public class Program
+{
+    public static void Main()
+    {
+        // Створюємо екземпляр класу PBKDF2 з алгоритмом SHA256
+        PBKDF2 pbkdf2 = new PBKDF2(HashAlgorithmName.SHA256);
+        // Часовий вимір для вимірювання часу обчислення хеша
+        Stopwatch stopwatch = new Stopwatch();
+        // Кількість ітерацій для вимірювань
+        int[] iterationsArray = new int[10];
+        for (int i = 0; i < 10; i++)
+        {
+            iterationsArray[i] = (i + 1) * 50000; // перше значення = номер варіанта * 10'000
+        }
+        // Вимірюємо час для різної кількості ітерацій
+        foreach (int iterations in iterationsArray)
+        {
+            stopwatch.Restart(); // Скидаємо таймер
+                                 // Обчислюємо хеш для заданої кількості ітерацій
+            string hashedPassword = pbkdf2.ComputeHash("your_password", iterations);
+            stopwatch.Stop(); // Зупиняємо таймер
+                              // Виводимо результати
+            Console.WriteLine($"Iterations: {iterations}, Time: {stopwatch.ElapsedMilliseconds} ms");
+        }
+    }
+}
