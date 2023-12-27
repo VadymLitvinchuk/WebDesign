@@ -1,0 +1,74 @@
+using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+
+class Program
+{
+    private readonly static string CspContainerName = "RsaContainer";
+
+    static void Main()
+    {
+        // Генерація ключів та підпис повідомлення
+        string message = "Hello, world!";
+        byte[] signature = SignMessage(message);
+        Console.WriteLine("Підписане повідомлення: " + Convert.ToBase64String(signature));
+
+        // Перевірка підпису
+        bool isVerified = VerifySignature(message, signature);
+        Console.WriteLine("ЕЦП перевірено: " + isVerified);
+    }
+
+    static byte[] SignMessage(string message)
+    {
+        var cspParams = new CspParameters
+        {
+            KeyContainerName = CspContainerName,
+            Flags = CspProviderFlags.UseMachineKeyStore
+        };
+
+        // Створення екземпляру провайдера RSA
+        using (var rsa = new RSACryptoServiceProvider(2048, cspParams))
+        {
+            // Використання секретного ключа з контейнера
+            rsa.PersistKeyInCsp = true;
+
+            
+            var rsaFormatter = new RSAPKCS1SignatureFormatter(rsa);
+            rsaFormatter.SetHashAlgorithm(nameof(SHA512));
+
+            // Обчислення хеш-коду повідомлення та створення ЕЦП
+            byte[] hashOfData;
+            using (var sha512 = SHA512.Create())
+            {
+                hashOfData = sha512.ComputeHash(Encoding.UTF8.GetBytes(message));
+            }
+
+            return rsaFormatter.CreateSignature(hashOfData);
+        }
+    }
+
+    static bool VerifySignature(string message, byte[] signature)
+    {
+        // Створення екземпляру провайдера RSA для відкритого ключа
+        using (var rsa = new RSACryptoServiceProvider(2048))
+        {
+            // Використання відкритого ключа з XML-файлу
+            rsa.PersistKeyInCsp = false;
+            rsa.FromXmlString(File.ReadAllText("publicKey.xml"));
+
+            
+            var rsaDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
+            rsaDeformatter.SetHashAlgorithm(nameof(SHA512));
+
+            // Обчислення хеш-коду повідомлення та перевірка ЕЦП
+            byte[] hashOfData;
+            using (var sha512 = SHA512.Create())
+            {
+                hashOfData = sha512.ComputeHash(Encoding.UTF8.GetBytes(message));
+            }
+
+            return rsaDeformatter.VerifySignature(hashOfData, signature);
+        }
+    }
+}
