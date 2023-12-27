@@ -1,0 +1,52 @@
+using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+
+class Program
+{
+    static void Main()
+    {
+        // Генерація ключів RSA
+        using (RSA rsa = new RSACryptoServiceProvider(2048))
+        {
+            // Збереження відкритого ключа у файл формату XML
+            string publicKeyXml = rsa.ToXmlString(false);
+            File.WriteAllText("publicKey.xml", publicKeyXml);
+
+            // Збереження приватного ключа у файл формату XML 
+            string privateKeyXml = rsa.ToXmlString(true);
+            File.WriteAllText("privateKey.xml", privateKeyXml);
+
+            // Відправлення вітань студентам
+            string message = "Вітаємо, студенти!";
+            byte[] encryptedMessage = Encrypt(message, publicKeyXml);
+            Console.WriteLine("Зашифроване повідомлення: " + Convert.ToBase64String(encryptedMessage));
+
+            // Розшифрування отриманих вітань
+            string decryptedMessage = Decrypt(encryptedMessage, privateKeyXml);
+            Console.WriteLine("Розшифроване повідомлення: " + decryptedMessage);
+        }
+    }
+
+    static byte[] Encrypt(string data, string publicKey)
+    {
+        using (RSA rsa = new RSACryptoServiceProvider())
+        {
+            rsa.FromXmlString(publicKey);
+            byte[] dataToEncrypt = Encoding.UTF8.GetBytes(data);
+            byte[] encryptedData = rsa.Encrypt(dataToEncrypt, RSAEncryptionPadding.Pkcs1);
+            return encryptedData;
+        }
+    }
+
+    static string Decrypt(byte[] encryptedData, string privateKey)
+    {
+        using (RSA rsa = new RSACryptoServiceProvider())
+        {
+            rsa.FromXmlString(privateKey);
+            byte[] decryptedData = rsa.Decrypt(encryptedData, RSAEncryptionPadding.Pkcs1);
+            return Encoding.UTF8.GetString(decryptedData);
+        }
+    }
+}
