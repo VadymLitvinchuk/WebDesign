@@ -1,0 +1,181 @@
+using System;
+using System.Collections.Generic;
+using System.Security;
+using System.Security.Cryptography;
+using System.Security.Principal;
+using System.Threading;
+using System.IO;
+
+public class User
+{
+    public string Login { get; set; }
+    public string PasswordHash { get; set; }
+    public string Salt { get; set; }
+    public string[] Roles { get; set; }
+}
+
+public static class Logger
+{
+    private static readonly string LogFilePath = "log.txt";
+
+    public static void Trace(string message, string methodName, string variableName, string oldValue, string newValue)
+    {
+        Log("TRACE", message, methodName, variableName, oldValue, newValue);
+    }
+
+    public static void Debug(string message, string methodName, string variableName, string oldValue, string newValue)
+    {
+        Log("DEBUG", message, methodName, variableName, oldValue, newValue);
+    }
+
+    public static void Info(string message, string methodName)
+    {
+        Log("INFO", message, methodName, null, null, null);
+    }
+
+    public static void Warn(string message, string methodName, Exception exception)
+    {
+        Log("WARN", message, methodName, null, null, exception?.ToString());
+    }
+
+    public static void Error(string message, string methodName, Exception exception)
+    {
+        Log("ERROR", message, methodName, null, null, exception?.ToString());
+    }
+
+    public static void Fatal(string message, string methodName, Exception exception)
+    {
+        Log("FATAL", message, methodName, null, null, exception?.ToString());
+    }
+
+    private static void Log(string level, string message, string methodName, string variableName, string oldValue, string newValue)
+    {
+        string logEntry = $"{DateTime.Now} [{level}] {message} | Method: {methodName}";
+
+        if (!string.IsNullOrEmpty(variableName))
+        {
+            logEntry += $" | Variable: {variableName} | Old Value: {oldValue} | New Value: {newValue}";
+        }
+
+        Console.WriteLine(logEntry);
+
+        // Додавання логу до файлу
+        File.AppendAllText(LogFilePath, logEntry + Environment.NewLine);
+    }
+}
+
+public class Protector
+{
+    private static Dictionary<string, User> _users = new Dictionary<string, User>();
+
+    public static User Register(string userName, string password, string[] roles = null)
+    {
+        if (_users.ContainsKey(userName))
+        {
+            Logger.Warn($"Користувач із ім'ям '{userName}' вже існує.", nameof(Register), null);
+            return null;
+        }
+
+        byte[] salt = new byte[16];
+        using (var rng = new RNGCryptoServiceProvider())
+        {
+            rng.GetBytes(salt);
+        }
+
+        using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 10000))
+        {
+            byte[] hash = pbkdf2.GetBytes(32);
+            string passwordHash = Convert.ToBase64String(hash);
+
+            var user = new User { Login = userName, PasswordHash = passwordHash, Salt = Convert.ToBase64String(salt), Roles = roles };
+            _users.Add(userName, user);
+
+            Logger.Info($"Користувач '{userName}' зареєстрований.", nameof(Register));
+            return user;
+        }
+    }
+
+    public static bool CheckPassword(string userName, string password)
+    {
+        if (!_users.ContainsKey(userName))
+        {
+            Logger.Warn($"Користувач із ім'ям '{userName}' не існує.", nameof(CheckPassword), null);
+            return false;
+        }
+
+        User user = _users[userName];
+
+        using (var pbkdf2 = new Rfc2898DeriveBytes(password, Convert.FromBase64String(user.Salt), 10000))
+        {
+            byte[] hash = pbkdf2.GetBytes(32);
+            string inputPasswordHash = Convert.ToBase64String(hash);
+
+            return inputPasswordHash == user.PasswordHash;
+        }
+    }
+
+    public static void LogIn(string userName, string password)
+    {
+        if (CheckPassword(userName, password))
+        {
+            var identity = new GenericIdentity(userName, "OIBAuth");
+            var principal = new GenericPrincipal(identity, _users[userName].Roles);
+            Thread.CurrentPrincipal = principal;
+
+            Logger.Info($"Користувач '{userName}' ввійшов в систему.", nameof(LogIn));
+        }
+        else
+        {
+            Logger.Warn($"Неуспішна спроба входу для користувача '{userName}'.", nameof(LogIn), null);
+        }
+    }
+
+    public static void OnlyForAdminsFeature()
+    {
+        if (Thread.CurrentPrincipal == null)
+        {
+            Logger.Error("Thread.CurrentPrincipal не може бути null.", nameof(OnlyForAdminsFeature), null);
+            throw new SecurityException("Thread.CurrentPrincipal не може бути null.");
+        }
+
+        if (!Thread.CurrentPrincipal.IsInRole("Admin"))
+        {
+            Logger.Error("Користувач повинен бути у ролі 'Admin' для доступу до цієї функціональності.", nameof(OnlyForAdminsFeature), null);
+            throw new SecurityException("Користувач повинен бути у ролі 'Admin' для доступу до цієї функціональності.");
+        }
+
+        Logger.Info("Звернення до функціональності для адміністраторів.", nameof(OnlyForAdminsFeature));
+        Console.WriteLine("Вам надано доступ до цієї захищеної функціональності.");
+    }
+}
+
+public class Program
+{
+    static void Main()
+    {
+        // Реєстрація користувачів
+        Protector.Register("user1", "password1", new[] { "Admin" });
+        Protector.Register("user2", "password2", new[] { "Moderator" });
+        Protector.Register("user3", "password3", new[] { "User" });
+        Protector.Register("user4", "password4", new[] { "User" });
+
+        // Аутентифікація користувача
+        Console.Write("Введіть ім'я користувача: ");
+        string username = Console.ReadLine();
+        Console.Write("Введіть пароль: ");
+        string password = Console.ReadLine();
+
+        Protector.LogIn(username, password);
+
+        // Перевірка доступу
+        try
+        {
+            Protector.OnlyForAdminsFeature();
+            Console.WriteLine("Доступ надано!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Відмовлено в доступі: {ex.Message}");
+        }
+    }
+}
