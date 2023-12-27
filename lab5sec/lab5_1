@@ -1,0 +1,55 @@
+using System;
+using System.Security.Cryptography;
+using System.Text;
+public class SaltedHash
+{
+    private byte[] salt;
+    public byte[] Salt
+    {
+        get { return salt; }
+    }
+    public SaltedHash()
+    {
+        // Генеруємо унікальну "сіль" для кожного екземпляру класу
+        GenerateSalt();
+    }
+    public string ComputeHash(string password)
+    {
+        // Перетворюємо пароль в байтовий масив
+        byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+        // Використовуємо PBKDF2 для обчислення хеша
+        using (var pbkdf2 = new Rfc2898DeriveBytes(passwordBytes, salt, 10000, HashAlgorithmName.SHA256))
+        {
+            // Отримуємо байтовий масив хеша (32 байти, оскільки SHA256 генерує 256 біт або 32 байти)
+            byte[] hash = pbkdf2.GetBytes(32);
+            // Перетворюємо хеш в рядок для зручності виведення
+            return Convert.ToBase64String(hash);
+        }
+    }
+    private void GenerateSalt()
+    {
+        // Використовуємо криптографічно безпечний генератор випадкових чисел для створення "солі"
+        using (var rng = new RNGCryptoServiceProvider())
+        {
+            byte[] saltBytes = new byte[16]; // 16 байт - розмір "солі"
+            rng.GetBytes(saltBytes);
+            salt = saltBytes;
+        }
+    }
+}
+public class Program
+{
+    public static void Main()
+    {
+        // Створюємо екземпляр класу SaltedHash, що ініціалізує унікальну "сіль"
+        SaltedHash saltedHash = new SaltedHash();
+        // Задаємо пароль, для якого буде обчислюватися хеш
+        string password = "your_password";
+        // Викликаємо метод ComputeHash для обчислення хеша паролю
+        string hashedPassword = saltedHash.ComputeHash(password);
+        // Виводимо інформацію про пароль, "сіль" та обчислений хеш
+        Console.WriteLine($"Password: {password}");
+        Console.WriteLine($"Salt: {Convert.ToBase64String(saltedHash.Salt)}");
+        Console.WriteLine($"Hashed Password: {hashedPassword}");
+    }
+}
